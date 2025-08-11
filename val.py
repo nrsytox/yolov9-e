@@ -194,6 +194,10 @@ def run(
         if compute_loss:
             loss += compute_loss(train_out, targets)[1]  # box, obj, cls
 
+        print(f"Tipo de preds antes do NMS: {type(preds)}")
+        if isinstance(preds, list):
+            print(f"Elemento 0 de preds é: {type(preds[0])}")
+
         # NMS
         targets[:, 2:] *= torch.tensor((width, height, width, height), device=device)  # to pixels
         lb = [targets[targets[:, 0] == i, 1:] for i in range(nb)] if save_hybrid else []  # for autolabelling
