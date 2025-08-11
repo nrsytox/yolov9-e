@@ -187,7 +187,7 @@ def run(
             nb, _, height, width = im.shape  # batch size, channels, height, width
 
         # Inference
-       with dt[1]:
+        with dt[1]:
           outputs = model(im) if compute_loss else model(im, augment=augment)
           if isinstance(outputs, (list, tuple)):
             # Explorar os níveis até chegar ao tensor de predições
@@ -205,10 +205,10 @@ def run(
                     break
           else:
               preds_candidate = outputs
-
+        
           # Agora preds_candidate deve ser o tensor que podemos passar pra NMS
           preds = preds_candidate
-
+        
           # Se ainda for lista com um tensor só, desempacote:
           if isinstance(preds, list) and len(preds) == 1:
               preds = preds[0]
