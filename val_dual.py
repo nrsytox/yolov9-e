@@ -187,16 +187,31 @@ def run(
             nb, _, height, width = im.shape  # batch size, channels, height, width
 
         # Inference
-        with dt[1]:
-            preds, train_out = model(im) if compute_loss else (model(im, augment=augment), None)
+       with dt[1]:
+          outputs = model(im) if compute_loss else model(im, augment=augment)
+          if isinstance(outputs, (list, tuple)):
+            # Explorar os níveis até chegar ao tensor de predições
+            # Teste print(outputs) ou print([type(o) for o in outputs])
+            preds_candidate = None
+            for o in outputs:
+                if isinstance(o, (list, tuple)):
+                    for sub_o in o:
+                        if isinstance(sub_o, torch.Tensor):
+                            # Suponha que esse é o tensor das predições (confira shape!)
+                            preds_candidate = sub_o
+                            break
+                elif isinstance(o, torch.Tensor):
+                    preds_candidate = o
+                    break
+          else:
+              preds_candidate = outputs
 
-        # Loss
-        if compute_loss:
-            preds = preds[1]
-            #train_out = train_out[1]
-            #loss += compute_loss(train_out, targets)[1]  # box, obj, cls
-        else:
-            preds = preds[0][1]
+          # Agora preds_candidate deve ser o tensor que podemos passar pra NMS
+          preds = preds_candidate
+
+          # Se ainda for lista com um tensor só, desempacote:
+          if isinstance(preds, list) and len(preds) == 1:
+              preds = preds[0]
 
         # NMS
         targets[:, 2:] *= torch.tensor((width, height, width, height), device=device)  # to pixels
